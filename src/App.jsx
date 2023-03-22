@@ -4,53 +4,78 @@ import "./App.css"
 import Dice from "./Dice.jsx"
 import Confetti from "react-confetti"
 
-function App() {
-	const [values, setValues] = React.useState(allNewDice())
-	const [tenzies, setTenzies] = React.useState(false)
+// TODO CSS put real dots on dice
+// [x] track the number of rolls
+// TODO Track the time it took to win
+// TODO save your best time to localStorage
 
-	function allNewDice() {
-		const values = []
+function App() {
+	const [values, setValues] = React.useState(allNewGame())
+
+	function allNewGame() {
+		const values = {
+			game: {
+				gameId: nanoid(),
+				tenzies: false,
+				rolls: 0,
+				time: [0],
+			},
+			dices: [],
+		}
 		for (let i = 0; i < 10; i++) {
-			const diceVal = {
+			const dice = {
 				id: nanoid(),
 				value: Math.ceil(Math.random() * 6),
 				isHeld: false,
 			}
-			values.push(diceVal)
+			values.dices.push(dice)
 		}
 		return values
 	}
-
-	React.useEffect(
-		() => {
-			setTenzies(
-				() => values.every(dice =>
-					dice.isHeld === true && (values.every((dice1) => dice1.value === dice.value))
-			))
-			console.log(tenzies ? "won" : "not yet")
-			console.log(values)
-		}, [values, tenzies]
-	)
-
+	/**
+	 *
+	 * @returns new dice game values
+	 */
 	function rollDice() {
-		return tenzies ? setValues(allNewDice()) : setValues(prevState => 
-			prevState.map(dice => {
-				return dice.isHeld ? dice : {...dice, value: Math.ceil(Math.random()*6)}
-			})
-		)
+		return values.game.tenzies
+			? setValues(allNewGame())
+			: setValues((prevState) => {
+					const newState = prevState.dices.map((dice) => {
+						return dice.isHeld
+							? dice
+							: { ...dice, value: Math.ceil(Math.random() * 6) }
+					})
+					return { ...prevState, dices: newState }
+			  })
 	}
-
+	/**
+	 * 
+	 * @param {diceId} diceId 
+	 */
 	function holdDice(diceId) {
-		setValues((prevState) => {
-			const newState = prevState.map((dice, index) => {
+		setValues(({ game, dices }) => {
+			const newDicesState = dices.map((dice, index) => {
 				return dice.id === diceId
 					? { ...dice, isHeld: !dice.isHeld }
 					: dice
 			})
-			return newState
+			const tenzies = newDicesState.every(
+				(dice) =>
+					dice.isHeld === true &&
+					newDicesState.every((dice1) => dice1.value === dice.value)
+			)
+			return { game: { ...game, tenzies: tenzies }, dices: newDicesState }
 		})
 	}
 
+	/**
+	 * watch tenzies game
+	 */
+	React.useEffect(() => {
+		console.log(values.game.tenzies ? "won" : "not yet")
+		console.log(values)
+		console.log(values.game.tenzies)
+	}, [values])
 	return (
 		<main>
 			<div className="container">
@@ -61,7 +86,7 @@ function App() {
 						freeze it at its current value between rolls.
 					</p>
 					<div className="game">
-						{values.map(dice => {
+						{values.dices.map((dice) => {
 							return (
 								<Dice
 									value={dice}
@@ -73,11 +98,11 @@ function App() {
 						})}
 					</div>
 					<button className="roll" onClick={rollDice}>
-						{tenzies ? "New game" : "Roll"}
+						{values.game.tenzies ? "New game" : "Roll"}
 					</button>
 				</div>
 			</div>
-			{tenzies && < Confetti />}
+			{values.game.tenzies && <Confetti />}
 		</main>
 	)
 }
