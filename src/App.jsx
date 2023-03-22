@@ -5,12 +5,14 @@ import Dice from "./Dice.jsx"
 import Confetti from "react-confetti"
 
 // TODO CSS put real dots on dice
-// [x] track the number of rolls
-// TODO Track the time it took to win
 // TODO save your best time to localStorage
 
 function App() {
+	// state to each new game
 	const [values, setValues] = React.useState(allNewGame())
+	const [startTime, setStartTime] = React.useState(0)
+	const [now, setNow] = React.useState(0)
+	const intervalId = React.useRef(null)
 
 	function allNewGame() {
 		const values = {
@@ -18,7 +20,8 @@ function App() {
 				gameId: nanoid(),
 				tenzies: false,
 				rolls: 0,
-				time: [0],
+				holds: 0,
+				gameTime: 0,
 			},
 			dices: [],
 		}
@@ -33,26 +36,30 @@ function App() {
 		return values
 	}
 	/**
-	 *
-	 * @returns new dice game values
+	 * track rolls and dice values :v
+	 * @returns values
 	 */
 	function rollDice() {
 		return values.game.tenzies
 			? setValues(allNewGame())
-			: setValues((prevState) => {
-					const newState = prevState.dices.map((dice) => {
+			: setValues(({ game, dices }) => {
+					const newState = dices.map((dice) => {
 						return dice.isHeld
 							? dice
 							: { ...dice, value: Math.ceil(Math.random() * 6) }
 					})
-					return { ...prevState, dices: newState }
+					return {
+						game: { ...game, rolls: game.rolls + 1 },
+						dices: newState,
+					}
 			  })
 	}
 	/**
-	 * 
-	 * @param {diceId} diceId 
+	 *  track tenzies, dices values(isHeld), time of game over.
+	 * @param {diceId} diceId
 	 */
 	function holdDice(diceId) {
+		// [x] Track the time it took to win -- I think here  we can check tenzies to set time over.
 		setValues(({ game, dices }) => {
 			const newDicesState = dices.map((dice, index) => {
 				return dice.id === diceId
@@ -64,17 +71,36 @@ function App() {
 					dice.isHeld === true &&
 					newDicesState.every((dice1) => dice1.value === dice.value)
 			)
-			return { game: { ...game, tenzies: tenzies }, dices: newDicesState }
+			const gameData = {...game, holds: game.holds+1, tenzies: tenzies}
+			const time = trackTime(gameData)
+			return {game: {...gameData, gameTime: time}, dices: newDicesState}
 		})
 	}
 
+	function trackTime(gameData) {
+		let time = gameData.gameTime
+		if (gameData.holds === 1){
+			setStartTime(Date.now)
+			setNow(Date.now)
+			intervalId.current = setInterval(() => setNow(Date.now), 10)
+			return time
+		}
+		if (gameData.tenzies) {
+			time = (now - startTime) / 1000
+			clearInterval(intervalId.current)
+		} else {
+			time = (now - startTime) / 1000
+		}
+		return time
+	}
+
 	/**
-	 * watch tenzies game
+	 * watch game for now!
 	 */
 	React.useEffect(() => {
+		
 		console.log(values.game.tenzies ? "won" : "not yet")
 		console.log(values)
-		console.log(values.game.tenzies)
 	}, [values])
 	return (
 		<main>
