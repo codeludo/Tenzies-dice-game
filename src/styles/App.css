@@ -6,10 +6,26 @@
 
 #root {
 	margin: 0;
+	
+}
+
+.app {
+	height: 100vh;
+	display:grid;
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: 64px auto 44px;
+	grid-template-areas: 
+	"n n n n"
+	"a c c c"
+	"f f f f";
+}
+
+main {
+	grid-area: c;
 }
 
 .container {
-	height: 100vh;
+	height: 100%;
 	text-align: center;
 	display: flex;
 	align-items: center;

@@ -1,5 +1,5 @@
 import React from "react";
-import "./Dice.css"
+import "../styles/Dice.css"
 
 
 export default function Dice(props) {

@@ -1,7 +1,7 @@
 import React from "react";
 import { nanoid } from "nanoid"
-import Dice from "./Dice.jsx"
-import './Board.css'
+import Dice from "../components/Dice.jsx"
+import '../styles/Board.css'
 import Confetti from "react-confetti"
 
 export default function Board() {
@@ -85,7 +85,7 @@ export default function Board() {
 			setStartTime(Date.now)
 			setNow(Date.now)
 			intervalId.current = setInterval(() => setNow(Date.now), 10)
-			return time
+			return 0
 		}
 		if (gameData.tenzies) {
 			time = (now - startTime) / 1000
@@ -96,7 +96,13 @@ export default function Board() {
 		return time
 	}
 
-    
+    /**
+	 * watch game for now!
+	 */
+	React.useEffect(() => {
+		console.log(values.game.tenzies ? "won" : "not yet")
+		console.log(values)
+	}, [values])
 
     return (
         <main>
