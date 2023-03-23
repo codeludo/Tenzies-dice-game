@@ -1,0 +1,59 @@
+.board {
+	width: 520px;
+	height: 520px;
+	padding: 32px;
+	background: #f5f5f5;
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+}
+
+h1 {
+	color: #2b283a;
+	margin: 0 0 8px 0;
+	font-style: normal;
+	font-weight: 700;
+	font-size: 32px;
+	font-family: "Karla", sans-serif;
+	line-height: 30px;
+	letter-spacing: 0.02em;
+}
+
+p {
+	margin: 0 2rem;
+	color: #4a4e74;
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	font-family: "Inter", sans-serif;
+	line-height: 16px;
+	letter-spacing: -0.03em;
+}
+
+.game {
+	margin: 8px 0;
+	padding: 8px;
+	width: auto;
+	height: 186px;
+	display: grid;
+	grid-template: auto auto / repeat(5, 0.5fr);
+	gap: 8px;
+}
+
+.roll {
+	width: 100px;
+	height: 35.84px;
+
+	background: #5035ff;
+	box-shadow: 0px 3.2px 7.68px rgba(0, 0, 0, 0.18);
+	border-radius: 3.81277px;
+
+	font-family: "Karla", sans-serif;
+	font-style: normal;
+	font-weight: 700;
+	font-size: 16.384px;
+	line-height: 19px;
+	color: #ffffff;
+}
