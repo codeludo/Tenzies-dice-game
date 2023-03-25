@@ -24,6 +24,7 @@ export default function Board(props) {
 			}
 			newGame.dices.push(dice)
 		}
+		// set state
 		props.setGames((prevState) => [...prevState, newGame])
 		props.setCurrentGameId(newGame.info.id)
 		props.setTime(0)
