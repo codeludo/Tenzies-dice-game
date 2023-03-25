@@ -19,30 +19,6 @@ function App() {
 	const [time, setTime] = React.useState(0)
 	const [startTime, setStartTime] = React.useState(0)
 
-	function createNewGame() {
-		const newGame = {
-			info: {
-				id: nanoid(),
-				tenzies: false,
-				rolls: 0,
-				holds: 0,
-				timeStamp: 0,
-			},
-			dices: [],
-		}
-		for (let i = 0; i < 10; i++) {
-			const dice = {
-				id: nanoid(),
-				value: Math.ceil(Math.random() * 6),
-				isHeld: false,
-			}
-			newGame.dices.push(dice)
-		}
-		setGames((prevState) => [...prevState, newGame])
-		setCurrentGameId(newGame.info.id)
-		setIsActive(true)
-	}
-
 	function findCurrentGame() {
 		return games.find((game) => game.info.id === currentGameId) || games[0]
 	}
@@ -51,44 +27,36 @@ function App() {
 	 * watch game for now!
 	 */
 	React.useEffect(() => {
-		if (isActive) console.log(findCurrentGame().info.tenzies ? "won" : "not yet")
-		console.log(findCurrentGame())
+		if (isActive)
+			console.log(findCurrentGame().info.tenzies ? "won" : "not yet")
+		console.log(
+			games.length > 0 ? findCurrentGame() : "need start a new game"
+		)
 		console.log(games)
 		console.log("time")
 		console.log(time)
+		console.log(currentGameId)
 	}, [games])
 
 	return (
 		<div className="app">
 			<Navbar />
-			<Sidebar games={games} currentGame={findCurrentGame()} />
-			{isActive ? (
-				<Board
-					time={time}
-					setTime={setTime}
-					setStartTime={setStartTime}
-					startTime={startTime}
-					isActive={isActive}
-					setIsActive={setIsActive}
-					findCurrentGame={findCurrentGame()}
-					setGames={setGames}
-				/>
-			) : (
-				<main>
-					<div className="container">
-						<div className="board">
-							<h1>No games</h1>
-							<button className="roll" onClick={createNewGame}>
-								Play
-							</button>
-						</div>
-					</div>
-				</main>
-			)}
+			<Sidebar games={games} findCurrentGame={findCurrentGame()} />
+			<Board
+				time={time} 
+				setTime={setTime}
+				setStartTime={setStartTime}
+				startTime={startTime}
+				isActive={isActive}
+				setIsActive={setIsActive}
+				findCurrentGame={findCurrentGame()}
+				setCurrentGameId={setCurrentGameId}
+				setGames={setGames}
+				games={games}
+			/>
 			<Footer />
 		</div>
 	)
 }
-
 export default App
 

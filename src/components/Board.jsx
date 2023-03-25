@@ -2,9 +2,9 @@ import React from "react"
 import Dice from "../components/Dice.jsx"
 import "../styles/Board.css"
 import Confetti from "react-confetti"
+import { nanoid } from "nanoid"
 
 export default function Board(props) {
-	//const [startTime, setStartTime] = React.useState(0)
 	function createNewGame() {
 		const newGame = {
 			info: {
@@ -24,7 +24,13 @@ export default function Board(props) {
 			}
 			newGame.dices.push(dice)
 		}
-		setGames(newGame)
+		// set state
+		props.setGames((prevState) => [...prevState, newGame])
+		props.setCurrentGameId(newGame.info.id)
+		props.setTime(0)
+		props.setStartTime(0)
+		props.setIsActive(true)
+		console.log("new game created")
 	}
 
 	/**
@@ -49,7 +55,7 @@ export default function Board(props) {
 						},
 						dices: newDicesState,
 					}
-				}
+				} else return game
 			})
 			return newGameState
 		})
@@ -63,6 +69,7 @@ export default function Board(props) {
 		const currentGame = props.findCurrentGame
 		props.setGames((prevState) => {
 			const newGameState = prevState.map((game) => {
+
 				if (game.info.id === currentGame.info.id) {
 					const newDicesState = game.dices.map((dice, index) => {
 						return dice.id === diceId
@@ -89,9 +96,8 @@ export default function Board(props) {
 						info: { ...gameData, timeStamp: time },
 						dices: newDicesState,
 					}
-				}
+				} else return game
 			})
-
 			return newGameState
 		})
 	}
@@ -106,14 +112,15 @@ export default function Board(props) {
 		if (game.holds === 1) {
 			const start = Date.now()
 			props.setStartTime(start)
+			console.log("game started")
 		}
 		if (game.tenzies) {
 			let now = Date.now()
-			timeElapsed =  (now - props.startTime) / 1000
+			timeElapsed = (now - props.startTime) / 1000
 			props.setTime(timeElapsed)
 		} else if (props.startTime != 0) {
 			let now = Date.now()
-			timeElapsed =  (now - props.startTime) / 1000
+			timeElapsed = (now - props.startTime) / 1000
 			props.setTime(timeElapsed)
 		}
 		return timeElapsed
@@ -121,33 +128,48 @@ export default function Board(props) {
 
 	return (
 		<main>
-			<div className="container">
-				<div className="board">
-					<h1>Tenzies</h1>
-					<p>
-						Roll until all dice are the same. Click each die to
-						freeze it at its current value between rolls.
-					</p>
-					<div className="game">
-						{props.findCurrentGame.dices.map((dice) => {
-							return (
-								<Dice
-									value={dice}
-									clickHandle={holdDice}
-									key={dice.id}
-									id={dice.id}
-								/>
-							)
-						})}
+			{!props.isActive ? (
+				<div className="container">
+					<div className="board">
+						<h1>No games</h1>
+						<button className="roll" onClick={createNewGame}>
+							Play
+						</button>
 					</div>
-					<button className="roll" onClick={rollDice}>
-						{props.findCurrentGame.info.tenzies
-							? "New game"
-							: "Roll"}
-					</button>
 				</div>
-			</div>
-			{props.findCurrentGame.info.tenzies && <Confetti />}
+			) : (
+				<div className="container">
+					<div className="board">
+						<h1>Tenzies</h1>
+						<p>
+							Roll until all dice are the same. Click each die to
+							freeze it at its current value between rolls.
+						</p>
+						<div className="game">
+							{props.findCurrentGame.dices.map((dice) => {
+								return (
+									<Dice
+										value={dice}
+										clickHandle={holdDice}
+										key={dice.id}
+										id={dice.id}
+									/>
+								)
+							})}
+						</div>
+						{props.findCurrentGame.info.tenzies ? (
+							<button className="roll" onClick={createNewGame}>
+								New game
+							</button>
+						) : (
+							<button className="roll" onClick={rollDice}>
+								Roll
+							</button>
+						)}
+					</div>
+					{props.findCurrentGame.info.tenzies && <Confetti />}
+				</div>
+			)}
 		</main>
 	)
 }
