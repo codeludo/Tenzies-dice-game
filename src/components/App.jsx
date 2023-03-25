@@ -52,7 +52,7 @@ function App() {
 	 */
 	React.useEffect(() => {
 		if (isActive) console.log(findCurrentGame().info.tenzies ? "won" : "not yet")
-		console.log(findCurrentGame())
+		console.log(games.length > 0 ? findCurrentGame() : "need start a new game")
 		console.log(games)
 		console.log("time")
 		console.log(time)
@@ -89,6 +89,5 @@ function App() {
 		</div>
 	)
 }
-
 export default App
 

@@ -2,9 +2,9 @@ import React from "react"
 import Dice from "../components/Dice.jsx"
 import "../styles/Board.css"
 import Confetti from "react-confetti"
+import { nanoid } from "nanoid"
 
 export default function Board(props) {
-	//const [startTime, setStartTime] = React.useState(0)
 	function createNewGame() {
 		const newGame = {
 			info: {
@@ -24,7 +24,7 @@ export default function Board(props) {
 			}
 			newGame.dices.push(dice)
 		}
-		setGames(newGame)
+		props.setGames(newGame)
 	}
 
 	/**
@@ -109,11 +109,11 @@ export default function Board(props) {
 		}
 		if (game.tenzies) {
 			let now = Date.now()
-			timeElapsed =  (now - props.startTime) / 1000
+			timeElapsed = (now - props.startTime) / 1000
 			props.setTime(timeElapsed)
 		} else if (props.startTime != 0) {
 			let now = Date.now()
-			timeElapsed =  (now - props.startTime) / 1000
+			timeElapsed = (now - props.startTime) / 1000
 			props.setTime(timeElapsed)
 		}
 		return timeElapsed
@@ -141,9 +141,7 @@ export default function Board(props) {
 						})}
 					</div>
 					<button className="roll" onClick={rollDice}>
-						{props.findCurrentGame.info.tenzies
-							? "New game"
-							: "Roll"}
+						{props.findCurrentGame.info.tenzies ? "new game" : "Roll"}
 					</button>
 				</div>
 			</div>
