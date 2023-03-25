@@ -111,6 +111,7 @@ export default function Board(props) {
 		if (game.holds === 1) {
 			const start = Date.now()
 			props.setStartTime(start)
+			console.log("game started")
 		}
 		if (game.tenzies) {
 			let now = Date.now()
