@@ -1,19 +1,14 @@
-import React from "react";
-import { nanoid } from "nanoid"
+import React from "react"
 import Dice from "../components/Dice.jsx"
-import '../styles/Board.css'
+import "../styles/Board.css"
 import Confetti from "react-confetti"
 
-export default function Board() {
-    const [values, setValues] = React.useState(allNewGame())
-    const [startTime, setStartTime] = React.useState(0)
-	const [now, setNow] = React.useState(0)
-	const intervalId = React.useRef(null)
-
-	function allNewGame() {
-		const values = {
-			game: {
-				gameId: nanoid(),
+export default function Board(props) {
+	//const [startTime, setStartTime] = React.useState(0)
+	function createNewGame() {
+		const newGame = {
+			info: {
+				id: nanoid(),
 				tenzies: false,
 				rolls: 0,
 				holds: 0,
@@ -27,94 +22,114 @@ export default function Board() {
 				value: Math.ceil(Math.random() * 6),
 				isHeld: false,
 			}
-			values.dices.push(dice)
+			newGame.dices.push(dice)
 		}
-		return values
+		setGames(newGame)
 	}
 
-    /**
+	/**
 	 * track rolls and dice values :v
 	 * @returns values
 	 */
 	function rollDice() {
-		return values.game.tenzies
-			? setValues(allNewGame())
-			: setValues(({ game, dices }) => {
-					const newState = dices.map((dice) => {
-						return dice.isHeld
-							? dice
-							: { ...dice, value: Math.ceil(Math.random() * 6) }
-					})
+		const currentGame = props.findCurrentGame
+		const newDicesState = currentGame.dices.map((dice) => {
+			return dice.isHeld
+				? dice
+				: { ...dice, value: Math.ceil(Math.random() * 6) }
+		})
+
+		props.setGames((prevState) => {
+			const newGameState = prevState.map((game) => {
+				if (game.info.id === currentGame.info.id) {
 					return {
-						game: { ...game, rolls: game.rolls + 1 },
-						dices: newState,
+						info: {
+							...currentGame.info,
+							rolls: currentGame.info.rolls + 1,
+						},
+						dices: newDicesState,
 					}
-			  })
+				}
+			})
+			return newGameState
+		})
 	}
 
-    /**
+	/**
 	 *  track tenzies, dices values(isHeld), timestamp each hold.
 	 * @param {diceId} diceId
 	 */
 	function holdDice(diceId) {
-		setValues(({ game, dices }) => {
-			const newDicesState = dices.map((dice, index) => {
-				return dice.id === diceId
-					? { ...dice, isHeld: !dice.isHeld }
-					: dice
+		const currentGame = props.findCurrentGame
+		props.setGames((prevState) => {
+			const newGameState = prevState.map((game) => {
+				if (game.info.id === currentGame.info.id) {
+					const newDicesState = game.dices.map((dice, index) => {
+						return dice.id === diceId
+							? { ...dice, isHeld: !dice.isHeld }
+							: dice
+					})
+					const tenzies = newDicesState.every(
+						(dice) =>
+							dice.isHeld === true &&
+							newDicesState.every(
+								(dice1) => dice1.value === dice.value
+							)
+					)
+
+					const gameData = {
+						...game.info,
+						holds: game.info.holds + 1,
+						tenzies: tenzies,
+					}
+
+					const time = trackTime(gameData)
+
+					return {
+						info: { ...gameData, timeStamp: time },
+						dices: newDicesState,
+					}
+				}
 			})
-			const tenzies = newDicesState.every(
-				(dice) =>
-					dice.isHeld === true &&
-					newDicesState.every((dice1) => dice1.value === dice.value)
-			)
-			const gameData = {...game, holds: game.holds+1, tenzies: tenzies}
-			const time = trackTime(gameData)
-			return {game: {...gameData, timeStamp: time}, dices: newDicesState}
+
+			return newGameState
 		})
 	}
 
-    /**
+	/**
 	 * track Time
-	 * @param {game data} gameData 
+	 * @param {game data} gameData
 	 * @returns time stamp of seconds
 	 */
-	function trackTime(gameData) {
-		let time = gameData.gameTime
-		if (gameData.holds === 1){
-			setStartTime(Date.now)
-			setNow(Date.now)
-			intervalId.current = setInterval(() => setNow(Date.now), 10)
-			return 0
+	function trackTime(game) {
+		let timeElapsed = 0
+		if (game.holds === 1) {
+			const start = Date.now()
+			props.setStartTime(start)
 		}
-		if (gameData.tenzies) {
-			time = (now - startTime) / 1000
-			clearInterval(intervalId.current)
-		} else {
-			time = (now - startTime) / 1000
+		if (game.tenzies) {
+			let now = Date.now()
+			timeElapsed =  (now - props.startTime) / 1000
+			props.setTime(timeElapsed)
+		} else if (props.startTime != 0) {
+			let now = Date.now()
+			timeElapsed =  (now - props.startTime) / 1000
+			props.setTime(timeElapsed)
 		}
-		return time
+		return timeElapsed
 	}
 
-    /**
-	 * watch game for now!
-	 */
-	React.useEffect(() => {
-		console.log(values.game.tenzies ? "won" : "not yet")
-		console.log(values)
-	}, [values])
-
-    return (
-        <main>
+	return (
+		<main>
 			<div className="container">
-			<div className="board">
+				<div className="board">
 					<h1>Tenzies</h1>
 					<p>
 						Roll until all dice are the same. Click each die to
 						freeze it at its current value between rolls.
 					</p>
 					<div className="game">
-						{values.dices.map((dice) => {
+						{props.findCurrentGame.dices.map((dice) => {
 							return (
 								<Dice
 									value={dice}
@@ -126,11 +141,14 @@ export default function Board() {
 						})}
 					</div>
 					<button className="roll" onClick={rollDice}>
-						{values.game.tenzies ? "New game" : "Roll"}
+						{props.findCurrentGame.info.tenzies
+							? "New game"
+							: "Roll"}
 					</button>
 				</div>
 			</div>
-			{values.game.tenzies && <Confetti />}
+			{props.findCurrentGame.info.tenzies && <Confetti />}
 		</main>
-    )
+	)
 }
+
