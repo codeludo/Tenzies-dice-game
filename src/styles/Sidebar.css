@@ -1,8 +1,46 @@
 aside {
     grid-area: a;
-    background-color: #3A4952;
+    background: #3A4952;
+}
+
+aside, h2 {
+    color: #080808;
 }
 
 .aside-content {
+    padding: 8px;
+}
+
+.game-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.game-item {
+    height: 48px;
+    border: 1px solid #5035ff;
+    border-radius: 10px;
+    background: linear-gradient(0deg, #B6BDC2 90%, #E7E9EB);
+    padding: 2px 6px;
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 60px;
+    align-items: center;
+    justify-content: space-evenly;
     
+}
+
+
+.game-item p {
+    margin: 0;
+    font-family: 'Karla', sans-serif;
+    font-size: 14px;
+}
+
+.game-item p:nth-child(1) {
+    margin-right: auto;
+}
+
+.game-item p:nth-child(2) {
+    margin-right: auto;
 }
